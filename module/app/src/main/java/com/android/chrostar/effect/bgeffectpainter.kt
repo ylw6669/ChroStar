@@ -1,6 +1,6 @@
 // Mirrored from KernelSU (me.weishu.kernelsu.ui.component.miuix.effect) / compose-miuix-ui example.
 
-package com.chrome.homelauncher.effect
+package com.android.chrostar.effect
 
 import android.os.Build
 import androidx.annotation.RequiresApi

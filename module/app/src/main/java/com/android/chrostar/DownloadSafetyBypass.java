@@ -1,4 +1,4 @@
-package com.chrome.homelauncher;
+package com.android.chrostar;
 
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;

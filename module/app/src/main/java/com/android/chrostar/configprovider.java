@@ -1,4 +1,4 @@
-package com.chrome.homelauncher;
+package com.android.chrostar;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public final class ConfigProvider extends ContentProvider {
 
-    public static final String AUTHORITY = "com.chrome.homelauncher.config";
+    public static final String AUTHORITY = "com.android.chrostar.config";
 
     @Override
     public boolean onCreate() {

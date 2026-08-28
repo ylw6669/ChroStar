@@ -1,4 +1,4 @@
-package com.chrome.homelauncher;
+package com.android.chrostar;
 
 import android.os.Handler;
 import android.os.Looper;

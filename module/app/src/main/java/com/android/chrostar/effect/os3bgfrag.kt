@@ -1,7 +1,7 @@
 // Mirrored from KernelSU (me.weishu.kernelsu.ui.component.miuix.effect) / compose-miuix-ui example.
 // AGSL 片段着色器: 4 个彩色光点 + Perlin 噪声流动混合, 构成"流光溢彩"背景。
 
-package com.chrome.homelauncher.effect
+package com.android.chrostar.effect
 
 const val OS3_BG_FRAG = """
     uniform vec2 uResolution;

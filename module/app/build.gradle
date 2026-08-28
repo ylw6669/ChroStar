@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.chrome.homelauncher'
+    namespace 'com.android.chrostar'
     compileSdk 37
 
     defaultConfig {
-        applicationId "com.chrome.homelauncher"
+        applicationId "com.android.chrostar"
         minSdk 33
         targetSdk 35
-        versionCode 68
-        versionName "1.15.1"
+        versionCode 69
+        versionName "1.16.0"
     }
 
     buildTypes {

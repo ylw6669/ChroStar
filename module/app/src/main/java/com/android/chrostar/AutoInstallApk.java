@@ -1,4 +1,4 @@
-package com.chrome.homelauncher;
+package com.android.chrostar;
 
 import android.content.Context;
 import android.content.Intent;

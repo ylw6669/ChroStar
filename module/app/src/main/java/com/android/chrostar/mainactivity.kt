@@ -1,4 +1,4 @@
-package com.chrome.homelauncher
+package com.android.chrostar
 
 import android.content.ComponentName
 import android.content.SharedPreferences
@@ -192,7 +192,7 @@ private fun SettingsScreen(prefs: SharedPreferences) {
                         }
                         try {
                             context.packageManager.setComponentEnabledSetting(
-                                ComponentName(context, "com.chrome.homelauncher.LauncherAlias"),
+                                ComponentName(context, ".LauncherAlias"),
                                 newState,
                                 PackageManager.DONT_KILL_APP
                             )

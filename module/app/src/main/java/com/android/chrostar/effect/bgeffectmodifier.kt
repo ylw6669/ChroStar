@@ -1,7 +1,7 @@
 // Mirrored from KernelSU (me.weishu.kernelsu.ui.component.miuix.effect) / compose-miuix-ui example.
 // 精简版: 去掉 PAD/splitPane 分支。
 
-package com.chrome.homelauncher.effect
+package com.android.chrostar.effect
 
 import android.annotation.SuppressLint
 import android.os.Build
