@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 用户提供的 Chrome 主页 Logo 素材, 70dp 居中于 108dp 画布(安全区 72dp 内) -->
+    <item
+        android:width="70dp"
+        android:height="70dp"
+        android:gravity="center"
+        android:drawable="@drawable/chrome_house_logo" />
+</layer-list>

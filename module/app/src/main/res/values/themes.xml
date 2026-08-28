@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- v1.13.9: 浅色也用与深色相同的自定义开屏图标, 保证两模式开屏图标尺寸一致
+         (系统默认 launcher 图标与自定义 splash 图标渲染尺寸天然不同) -->
+    <style name="Theme.HomeLauncher" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_ball</item>
+    </style>
+</resources>

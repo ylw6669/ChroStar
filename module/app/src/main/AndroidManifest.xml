@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:label="ChroStar"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:allowBackup="false">
+
+        <!-- LSPosed 模块声明 -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="ChroStar: Chrome 启动直开主页/新标签页、禁止恢复并清空历史标签页、去除下载文件有害警告、APK 文件下载完成自动安装" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+        <!-- 作用域：com.android.chrome -->
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <!-- v1.11.0: 设置页本体加 Xposed 专用入口(MODULE_SETTINGS category)。
+             参考 FingerprintPay: LSPosed 打开模块设置走此 category 而非 LAUNCHER,
+             因此隐藏桌面 alias 后设置页仍可从 LSPosed 打开, 不再死锁。 -->
+        <activity android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.HomeLauncher">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="de.robv.android.xposed.category.MODULE_SETTINGS" />
+            </intent-filter>
+        </activity>
+
+        <!-- v1.11.2: 关于二级页(全屏) -->
+        <activity android:name=".AboutActivity"
+            android:exported="false"
+            android:theme="@style/Theme.HomeLauncher" />
+
+        <!-- v1.10.4: 配置跨进程读取通道(XSharedPreferences 无法跨进程读取) -->
+        <provider
+            android:name=".ConfigProvider"
+            android:authorities="com.chrome.homelauncher.config"
+            android:exported="true" />
+
+        <!-- 桌面图标入口（alias）：隐藏桌面图标时只禁用这个组件 -->
+        <activity-alias
+            android:name=".LauncherAlias"
+            android:targetActivity=".MainActivity"
+            android:exported="true"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="ChroStar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+    </application>
+
+</manifest>

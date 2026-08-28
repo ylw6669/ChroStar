@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- v1.13.9: 夜间分支 —— 与浅色共用同一开屏图标(尺寸一致) -->
+    <style name="Theme.HomeLauncher" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_ball</item>
+    </style>
+</resources>

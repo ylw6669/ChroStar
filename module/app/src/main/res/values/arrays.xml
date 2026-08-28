@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="xposed_scope">
+        <item>com.android.chrome</item>
+        <item>com.android.chrome.beta</item>
+        <item>com.android.chrome.dev</item>
+        <item>com.android.chrome.canary</item>
+        <item>org.chromium.chrome</item>
+    </string-array>
+</resources>

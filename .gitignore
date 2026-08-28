@@ -1,0 +1,17 @@
+# 构建产物
+build/
+module/build/
+build-proj/build/
+app/build/
+
+# 密钥与本地配置
+*.keystore
+*.jks
+local.properties
+
+# 日志与临时文件
+*.log
+.openclaw-tmp/
+.gradle/
+.idea/
+*.iml

@@ -1,0 +1,19 @@
+// settings.gradle
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        // de.robv.android.xposed:api:82 已从 Maven Central 移除,需第三方镜像(api.xposed.info)
+        maven { url 'https://api.xposed.info/' }
+    }
+}
+rootProject.name = "ChromeHomeLauncher"
+include ':app'

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 单色层: Chrome 彩环 + 小房子剪影(主题图标用) -->
+    <path
+        android:pathData="M54,26 A28,28 0 1,0 54,82 A28,28 0 1,0 54,26 Z"
+        android:strokeWidth="12"
+        android:strokeColor="#000000" />
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,42.5 L62.5,50 L62.5,62.5 L58,62.5 L58,56 L50,56 L50,62.5 L45.5,62.5 L45.5,50 Z" />
+</vector>
