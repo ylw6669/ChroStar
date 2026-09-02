@@ -57,6 +57,9 @@ private fun SettingsScreen(prefs: SharedPreferences) {
     var autoInstallApk by remember { mutableStateOf(prefs.getBoolean(HookEntry.KEY_AUTO_INSTALL_APK, true)) }
     var hideIcon by remember { mutableStateOf(prefs.getBoolean(KEY_HIDE_ICON, false)) }
     var clearTabs by remember { mutableStateOf(prefs.getBoolean(HookEntry.KEY_CLEAR_TABS, true)) }
+    var bannerApkToast by remember { mutableStateOf(prefs.getBoolean(HookEntry.KEY_BANNER_APK_TOAST, true)) }
+    var bannerAllToast by remember { mutableStateOf(prefs.getBoolean(HookEntry.KEY_BANNER_ALL_TOAST, false)) }
+    var hideTranslateBanner by remember { mutableStateOf(prefs.getBoolean(HookEntry.KEY_HIDE_TRANSLATE_BANNER, true)) }
 
     fun save() {
         prefs.edit()
@@ -71,6 +74,9 @@ private fun SettingsScreen(prefs: SharedPreferences) {
             .putBoolean(HookEntry.KEY_AUTO_INSTALL_APK, autoInstallApk)
             .putBoolean(KEY_HIDE_ICON, hideIcon)
             .putBoolean(HookEntry.KEY_CLEAR_TABS, clearTabs)
+            .putBoolean(HookEntry.KEY_BANNER_APK_TOAST, bannerApkToast)
+            .putBoolean(HookEntry.KEY_BANNER_ALL_TOAST, bannerAllToast)
+            .putBoolean(HookEntry.KEY_HIDE_TRANSLATE_BANNER, hideTranslateBanner)
             .apply()
     }
 
@@ -153,15 +159,6 @@ private fun SettingsScreen(prefs: SharedPreferences) {
                     checked = autoInstallApk,
                     onCheckedChange = { autoInstallApk = it; save() }
                 )
-                // 下载横幅转吐司开关
-                SwitchPreference(
-                    title = "下载横幅转吐司",
-                    summary = "下载完成横幅 → Toast；禁用时显示系统下载通知",
-                    checked = prefs.getBoolean("banner_apk_toast", true),
-                    onCheckedChange = { checked ->
-                        prefs.edit().putBoolean("banner_apk_toast", checked).apply()
-                    }
-                )
             }
 
             // ── 历史标签删除 ──
@@ -179,6 +176,33 @@ private fun SettingsScreen(prefs: SharedPreferences) {
                 )
             }
 
+            // ── 横幅 ──
+            SmallTitle(text = "横幅")
+            Card(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .padding(bottom = 12.dp)
+            ) {
+                SwitchPreference(
+                    title = "APK 下载完成横幅用 Toast 代替",
+                    summary = "只影响 APK，下载完成后弹系统提示",
+                    checked = bannerApkToast,
+                    onCheckedChange = { bannerApkToast = it; save() }
+                )
+                SwitchPreference(
+                    title = "所有下载完成横幅用 Toast 代替",
+                    summary = "所有文件下载完成都不显示横幅",
+                    checked = bannerAllToast,
+                    onCheckedChange = { bannerAllToast = it; save() }
+                )
+                SwitchPreference(
+                    title = "隐藏翻译横幅",
+                    summary = "不显示「翻译此页」提示",
+                    checked = hideTranslateBanner,
+                    onCheckedChange = { hideTranslateBanner = it; save() }
+                )
+            }
+
             // ── 模块 ──
             SmallTitle(text = "模块")
             Card(
@@ -187,15 +211,6 @@ private fun SettingsScreen(prefs: SharedPreferences) {
                     .padding(bottom = 12.dp)
             ) {
                 val context = LocalContext.current
-                // 隐藏翻译横幅开关
-                SwitchPreference(
-                    title = "隐藏翻译横幅",
-                    summary = "隐藏 Chrome 下载弹窗中的翻译横幅",
-                    checked = prefs.getBoolean("hide_translate_banner", true),
-                    onCheckedChange = { checked ->
-                        prefs.edit().putBoolean("hide_translate_banner", checked).apply()
-                    }
-                )
                 SwitchPreference(
                     title = "隐藏桌面图标",
                     summary = if (hideIcon) "已隐藏，LSPosed 中仍可打开设置" else "在桌面隐藏本模块图标",
