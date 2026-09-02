@@ -153,6 +153,15 @@ private fun SettingsScreen(prefs: SharedPreferences) {
                     checked = autoInstallApk,
                     onCheckedChange = { autoInstallApk = it; save() }
                 )
+                // 下载横幅转吐司开关
+                SwitchPreference(
+                    title = "下载横幅转吐司",
+                    summary = "下载完成横幅 → Toast；禁用时显示系统下载通知",
+                    checked = prefs.getBoolean("banner_apk_toast", true),
+                    onCheckedChange = { checked ->
+                        prefs.edit().putBoolean("banner_apk_toast", checked).apply()
+                    }
+                )
             }
 
             // ── 历史标签删除 ──
@@ -178,6 +187,15 @@ private fun SettingsScreen(prefs: SharedPreferences) {
                     .padding(bottom = 12.dp)
             ) {
                 val context = LocalContext.current
+                // 隐藏翻译横幅开关
+                SwitchPreference(
+                    title = "隐藏翻译横幅",
+                    summary = "隐藏 Chrome 下载弹窗中的翻译横幅",
+                    checked = prefs.getBoolean("hide_translate_banner", true),
+                    onCheckedChange = { checked ->
+                        prefs.edit().putBoolean("hide_translate_banner", checked).apply()
+                    }
+                )
                 SwitchPreference(
                     title = "隐藏桌面图标",
                     summary = if (hideIcon) "已隐藏，LSPosed 中仍可打开设置" else "在桌面隐藏本模块图标",
