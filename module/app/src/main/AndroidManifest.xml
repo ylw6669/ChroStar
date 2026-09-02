@@ -42,7 +42,7 @@
         <!-- v1.10.4: 配置跨进程读取通道(XSharedPreferences 无法跨进程读取) -->
         <provider
             android:name=".ConfigProvider"
-            android:authorities="com.android.chrostar.config"
+            android:authorities="com.stars.chrostar.config"
             android:exported="true" />
 
         <!-- 桌面图标入口（alias）：隐藏桌面图标时只禁用这个组件 -->

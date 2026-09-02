@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.android.chrostar'
+    namespace 'com.stars.chrostar'
     compileSdk 37
 
     defaultConfig {
-        applicationId "com.android.chrostar"
+        applicationId "com.stars.chrostar"
         minSdk 33
         targetSdk 35
-        versionCode 73
-        versionName "1.16.4"
+        versionCode 74
+        versionName "1.16.5"
     }
 
     buildTypes {
