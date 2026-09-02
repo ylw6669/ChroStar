@@ -1,8 +1,8 @@
 # LSPosed 入口必须保留类名（框架通过接口实现发现模块）
--keep class com.chrome.homelauncher.HookEntry { *; }
+-keep class com.android.chrostar.HookEntry { *; }
 
 # Activity 由 manifest 引用，R8 自动保留；这里显式声明以防混淆
--keep class com.chrome.homelauncher.MainActivity { *; }
+-keep class com.android.chrostar.MainActivity { *; }
 
 # Xposed API 是 compileOnly，运行时由框架提供，不需要打进去
 -dontwarn de.robv.android.xposed.**
