@@ -77,7 +77,7 @@ private fun SettingsScreen(prefs: SharedPreferences) {
             .putBoolean(HookEntry.KEY_BANNER_APK_TOAST, bannerApkToast)
             .putBoolean(HookEntry.KEY_BANNER_ALL_TOAST, bannerAllToast)
             .putBoolean(HookEntry.KEY_HIDE_TRANSLATE_BANNER, hideTranslateBanner)
-            .apply()
+            .commit()
     }
 
     Scaffold(

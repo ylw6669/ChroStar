@@ -61,7 +61,7 @@ public final class BannerController {
                         protected void beforeHookedMethod(MethodHookParam param) {
                             try {
                                 boolean hide = HookEntry.readPrefBoolean(
-                                        HookEntry.KEY_HIDE_TRANSLATE_BANNER, false);
+                                        HookEntry.KEY_HIDE_TRANSLATE_BANNER, true);
                                 if (HookEntry.DEBUG) XposedBridge.log(HookEntry.TAG
                                         + ": TranslateMessage.create called, hide=" + hide);
                                 if (hide) {
@@ -98,7 +98,7 @@ public final class BannerController {
                         protected void beforeHookedMethod(MethodHookParam param) {
                             try {
                                 boolean hide = HookEntry.readPrefBoolean(
-                                        HookEntry.KEY_HIDE_TRANSLATE_BANNER, false);
+                                        HookEntry.KEY_HIDE_TRANSLATE_BANNER, true);
                                 if (HookEntry.DEBUG) XposedBridge.log(HookEntry.TAG
                                         + ": TranslateMessage.showMessage called, hide=" + hide);
                                 if (hide) {
@@ -245,7 +245,7 @@ public final class BannerController {
             try {
                 // v1.10.1: 隐藏翻译横幅双保险 —— 消息 ID == 29 即翻译横幅
                 if (HookEntry.readPrefBoolean(
-                        HookEntry.KEY_HIDE_TRANSLATE_BANNER, false)) {
+                        HookEntry.KEY_HIDE_TRANSLATE_BANNER, true)) {
                     Object model = param.args[0];
                     boolean isTrans = isTranslateMessage(model,
                             param.thisObject.getClass().getClassLoader());
