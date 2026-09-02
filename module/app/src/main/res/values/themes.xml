@@ -5,5 +5,10 @@
     <style name="Theme.HomeLauncher" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_ball</item>
+        <!-- v1.16.6: targetSdk 35 强制 edge-to-edge, 内容延伸到状态栏后面;
+             Material.Light 状态栏图标默认仍为白色, 浅色背景上不可见 → 强制深色图标。
+             导航栏同理(API 27+, minSdk 33 恒可用)。深色主题保持白图标无需改动。 -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 </resources>
