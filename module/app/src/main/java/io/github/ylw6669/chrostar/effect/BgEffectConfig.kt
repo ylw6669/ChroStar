@@ -1,6 +1,6 @@
 // Mirrored from KernelSU (me.weishu.kernelsu.ui.component.miuix.effect) / compose-miuix-ui example.
 
-package com.stars.chrostar.effect
+package io.github.ylw6669.chrostar.effect
 
 internal object BgEffectConfig {
 

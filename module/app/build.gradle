@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.stars.chrostar'
+    namespace 'io.github.ylw6669.chrostar'
     compileSdk 37
 
     defaultConfig {
-        applicationId "com.stars.chrostar"
+        applicationId "io.github.ylw6669.chrostar"
         minSdk 33
         targetSdk 35
-        versionCode 75
-        versionName "1.16.6"
+        versionCode 76
+        versionName "2.0.0"
     }
 
     buildTypes {

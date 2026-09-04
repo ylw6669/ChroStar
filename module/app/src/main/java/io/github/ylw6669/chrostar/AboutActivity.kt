@@ -1,4 +1,4 @@
-package com.stars.chrostar
+package io.github.ylw6669.chrostar
 
 import android.content.Intent
 import android.net.Uri
@@ -38,7 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stars.chrostar.effect.BgEffectBackground
+import io.github.ylw6669.chrostar.effect.BgEffectBackground
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
 import top.yukonga.miuix.kmp.basic.Text

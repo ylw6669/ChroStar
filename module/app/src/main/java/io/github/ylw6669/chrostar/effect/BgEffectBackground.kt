@@ -1,7 +1,7 @@
 // Mirrored from KernelSU (me.weishu.kernelsu.ui.component.miuix.effect) / compose-miuix-ui example.
 // 精简版: 去掉 PAD 分支与 splitPane 依赖, 仅手机竖屏场景。
 
-package com.stars.chrostar.effect
+package io.github.ylw6669.chrostar.effect
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.spring

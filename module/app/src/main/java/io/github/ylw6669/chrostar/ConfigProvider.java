@@ -1,4 +1,4 @@
-package com.stars.chrostar;
+package io.github.ylw6669.chrostar;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -23,7 +23,7 @@ import java.util.Map;
  */
 public final class ConfigProvider extends ContentProvider {
 
-    public static final String AUTHORITY = "com.stars.chrostar.config";
+    public static final String AUTHORITY = "io.github.ylw6669.chrostar.config";
 
     @Override
     public boolean onCreate() {

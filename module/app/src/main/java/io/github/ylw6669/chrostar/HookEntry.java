@@ -1,4 +1,4 @@
-package com.stars.chrostar;
+package io.github.ylw6669.chrostar;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -37,7 +37,7 @@ public class HookEntry implements IXposedHookLoadPackage {
     public static final String TAG = "HomeLauncherLSP";
     /** 热路径诊断日志开关(编译期常量, 发布版关闭) */
     static final boolean DEBUG = false;
-    public static final String PREFS_NAME = "com.stars.chrostar_preferences";
+    public static final String PREFS_NAME = "io.github.ylw6669.chrostar_preferences";
     /** Chrome native 桥类(J.N), DownloadSafetyBypass/HomeCleaner 共用 */
     public static final String CLS_J_N = "J.N";
 
@@ -293,7 +293,7 @@ public class HookEntry implements IXposedHookLoadPackage {
         }
         // 兜底: XSharedPreferences(旧环境/CP 不可用时)
         try {
-            XSharedPreferences prefs = new XSharedPreferences("com.stars.chrostar");
+            XSharedPreferences prefs = new XSharedPreferences("io.github.ylw6669.chrostar");
             prefs.reload();
             if (prefs.contains(key)) {
                 Object v = prefs.getAll().get(key);

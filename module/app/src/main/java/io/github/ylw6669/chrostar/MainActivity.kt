@@ -1,4 +1,4 @@
-package com.stars.chrostar
+package io.github.ylw6669.chrostar
 
 import android.content.ComponentName
 import android.content.SharedPreferences
