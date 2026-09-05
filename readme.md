@@ -1,6 +1,8 @@
 # ChroStar
 
-**LSPosed 模块**：让 Chrome 启动直开主页，并接管下载体验 —— Chrome 145.0.7632.218 实测通过。
+**LSPosed 模块**：让 Chrome 启动直开主页，并接管下载体验。
+
+当前已实测通过 Chrome `152.0.7977.76`，并保留 Chrome `145.0.7632.218` 的兼容路径。
 
 > **关于该版本 Chrome**：此版本自 Aluminium OS（Android 17 电脑版）提取，已支持官方添加扩展。下载链接：[123 云盘](https://1639741.share.123pan.cn/123pan/GNzA-6VjO)
 
@@ -19,7 +21,10 @@
 
 ## 实现原理（Hook 点位）
 
-混淆类名为 Chrome 145 根包短名（R8 产物），全部经 jadx + 真机日志验证：
+混淆类名来自 Chrome R8 产物，全部经 jadx + 真机日志验证。Chrome 152 使用
+isolated split，核心类位于 `split_chrome.apk`，模块会在
+`SplitChromeApplication.createContextForSplit("chrome")` 返回真实 ClassLoader 后再安装核心 hook；
+Chrome 145 的旧入口作为 fallback 保留：
 
 | 功能 | Hook 点 |
 |------|---------|
@@ -31,6 +36,17 @@
 | APK 自动安装 | `c9o.run` / `zkg.f` / `DownloadUtils.a(qe7)` / `onDownloadCompleted` 四路径 |
 | 横幅 | `je7.d` 标记 + `nze.b/c` 拦截；`TranslateMessage.create/showMessage` 断翻译横幅 |
 | 历史清理 | `J.N.VIOOOOOOO(0, …, {8}, …)` 删除「关闭的标签页」 |
+
+### Chrome 152 验证结果
+
+- `ChromeTabbedActivity.onStart()`、`qiq#getCount()`、`k3r.B*` 和
+  `TabModelJniBridge.openNewTab` hook 成功。
+- 六类下载安全弹窗 hook 成功，翻译横幅拦截成功。
+- 冷启动成功打开主页，并执行关闭标签页历史清理。
+- Chrome 进程在 hook 完成后保持运行，无 `FATAL EXCEPTION`。
+
+旧版本专用的 `c9o`、`zkg`、`je7`、`nze` 入口在 Chrome 152 中可能打印找不到类或方法，
+这些是兼容性 fallback 的诊断日志，不影响 Chrome 152 的新入口。
 
 配置跨进程读取：`XSharedPreferences` 失效（Android 11+），改用 exported `ConfigProvider` + 5 秒缓存，hook 侧优先走 ContentProvider。
 
@@ -44,13 +60,13 @@
 
 ## 构建
 
-```bash
-# Android Studio 或命令行（AGP + JDK 17）
-./gradlew assembleRelease
-```
+使用 Android Studio 打开 `module` 目录，或使用 AGP 9.0.0 + JDK 17 执行
+`assembleDebug` / `assembleRelease`。仓库当前未提交 Gradle wrapper，命令行构建需要本机安装 Gradle。
 
 - minSdk 33 / targetSdk 35 / compose + miuix 0.9.x
 - 签名：debug keystore 即可（模块签名与 Chrome 无关）
+
+当前验证 APK：`module/app/build/outputs/apk/debug/app-debug.apk`，版本 `2.0.0`（versionCode `76`）。
 
 ## 免责声明
 

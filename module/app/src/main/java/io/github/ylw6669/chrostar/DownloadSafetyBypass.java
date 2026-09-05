@@ -1,5 +1,7 @@
 package io.github.ylw6669.chrostar;
 
+import android.content.Context;
+
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
@@ -114,18 +116,28 @@ public final class DownloadSafetyBypass {
         return XposedHelpers.getLongField(bridge, "a");
     }
 
+    private static boolean isChrome152OrLater() {
+        try {
+            Context context = HookEntry.getAppContext(null);
+            if (context == null) return false;
+            String versionName = context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).versionName;
+            int dot = versionName == null ? -1 : versionName.indexOf('.');
+            return dot > 0 && Integer.parseInt(versionName.substring(0, dot)) >= 152;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
     // ------------------------------------------------------------------
     // 1) 危险下载警告 ("文件可能有害") — 开关 bypass_dangerous
     // ------------------------------------------------------------------
     private static void hookDangerous(XC_LoadPackage.LoadPackageParam lpparam) {
         try {
-            Class<?> windowClass = XposedHelpers.findClass(
-                    "org.chromium.ui.base.WindowAndroid", lpparam.classLoader);
-            XposedHelpers.findAndHookMethod(
+            Class<?> bridge = XposedHelpers.findClass(
                     "org.chromium.chrome.browser.download.DangerousDownloadDialogBridge",
-                    lpparam.classLoader, "showDialog",
-                    windowClass, String.class, String.class,
-                    long.class, String.class, int.class,
+                    lpparam.classLoader);
+            XposedBridge.hookAllMethods(bridge, "showDialog",
                     new XC_MethodHook() {
                         @Override
                         protected void beforeHookedMethod(MethodHookParam param) {
@@ -133,9 +145,10 @@ public final class DownloadSafetyBypass {
                             try {
                                 long ptr = nativePtr(param.thisObject);
                                 String guid = (String) param.args[1];
-                                allowVJO(param.thisObject, 124, ptr, guid);
+                                int callback = isChrome152OrLater() ? 43 : 124;
+                                allowVJO(param.thisObject, callback, ptr, guid);
                                 param.setResult(null);
-                                log("dangerous download bypassed (VJO 124)");
+                                log("dangerous download bypassed (VJO " + callback + ")");
                             } catch (Throwable t) {
                                 err("dangerous", t);
                             }
@@ -165,9 +178,10 @@ public final class DownloadSafetyBypass {
                             try {
                                 long ptr = nativePtr(param.thisObject);
                                 long downloadId = (Long) param.args[3];
-                                allowVJJZ(param.thisObject, 3, ptr, downloadId, true);
+                                int callback = isChrome152OrLater() ? 2 : 3;
+                                allowVJJZ(param.thisObject, callback, ptr, downloadId, true);
                                 param.setResult(null);
-                                log("insecure download bypassed (VJJZ 3, true)");
+                                log("insecure download bypassed (VJJZ " + callback + ", true)");
                             } catch (Throwable t) {
                                 err("insecure", t);
                             }
@@ -201,9 +215,10 @@ public final class DownloadSafetyBypass {
                             try {
                                 long ptr = nativePtr(param.thisObject);
                                 long downloadId = (Long) param.args[6];
-                                allowVJJZ(param.thisObject, 2, ptr, downloadId, true);
+                                int callback = isChrome152OrLater() ? 1 : 2;
+                                allowVJJZ(param.thisObject, callback, ptr, downloadId, true);
                                 param.setResult(null);
-                                log("duplicate download bypassed (VJJZ 2, true)");
+                                log("duplicate download bypassed (VJJZ " + callback + ", true)");
                             } catch (Throwable t) {
                                 err("duplicate", t);
                             }
@@ -233,9 +248,10 @@ public final class DownloadSafetyBypass {
                             try {
                                 long ptr = nativePtr(param.thisObject);
                                 String guid = (String) param.args[0];
-                                allowVJO(param.thisObject, 129, ptr, guid);
+                                int callback = isChrome152OrLater() ? 47 : 129;
+                                allowVJO(param.thisObject, callback, ptr, guid);
                                 param.setResult(null);
-                                log("policy warning download bypassed (VJO 129)");
+                                log("policy warning download bypassed (VJO " + callback + ")");
                             } catch (Throwable t) {
                                 err("policy", t);
                             }
@@ -318,9 +334,10 @@ public final class DownloadSafetyBypass {
                             try {
                                 long ptr = nativePtr(param.thisObject);
                                 String path = (String) param.args[1];
-                                allowVJOZ(param.thisObject, 15, ptr, path, false);
+                                int callback = isChrome152OrLater() ? 9 : 15;
+                                allowVJOZ(param.thisObject, callback, ptr, path, false);
                                 param.setResult(null);
-                                log("open dialog bypassed (VJOZ 15, false)");
+                                log("open dialog bypassed (VJOZ " + callback + ", false)");
                             } catch (Throwable t) {
                                 err("open", t);
                             }
