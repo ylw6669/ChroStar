@@ -29,8 +29,10 @@ import java.util.List;
  */
 public final class HomeCleaner {
 
-    private static final String CLS_SELECTOR = "tuo";   // TabModelSelector(根包)
-    private static final String CLS_HOME_MGR = "jza";   // HomepageManager(根包)
+    private static final String CLS_SELECTOR = "tuo";   // Chrome 145 TabModelSelector
+    private static final String CLS_SELECTOR_152 = "k3r"; // Chrome 152 TabModelSelector
+    private static final String CLS_HOME_MGR = "jza";   // Chrome 145 HomepageManager
+    private static final String CLS_HOME_MGR_152 = "w5c"; // Chrome 152 HomepageManager
     private static final String CLS_MENU_RUNNABLE = "id4"; // 菜单关闭 Runnable(根包)
     private static final String CLS_TAB_MODEL_JNI_BRIDGE =
             "org.chromium.chrome.browser.tabmodel.TabModelJniBridge";
@@ -263,7 +265,39 @@ public final class HomeCleaner {
             XposedBridge.log(HookEntry.TAG
                     + ": hooked l04.l* (ChromeTabCreator all overloads, newtab->home)");
         } catch (Throwable t) {
-            XposedBridge.log(HookEntry.TAG + ": hook l04.l failed -> " + t);
+            XposedBridge.log(HookEntry.TAG + ": hook l04.l unavailable -> " + t);
+        }
+        try {
+            Class<?> selector = XposedHelpers.findClass(CLS_SELECTOR_152,
+                    lpparam.classLoader);
+            XposedBridge.hookAllMethods(selector, "B", new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) {
+                    replaceNtpWithHome(param);
+                }
+            });
+            XposedBridge.log(HookEntry.TAG + ": hooked k3r.B* (Chrome 152 newtab->home)");
+        } catch (Throwable t) {
+            XposedBridge.log(HookEntry.TAG + ": hook k3r.B unavailable -> " + t);
+        }
+    }
+
+    private static void replaceNtpWithHome(XC_MethodHook.MethodHookParam param) {
+        try {
+            if (!HookEntry.readPrefBoolean(HookEntry.KEY_NEWTAB_HOME, true)
+                    || param.args == null || param.args.length == 0 || param.args[0] == null) {
+                return;
+            }
+            Object params = param.args[0];
+            Object urlObj = XposedHelpers.getObjectField(params, "a");
+            String spec = urlObj instanceof String ? (String) urlObj : null;
+            if (spec == null || !isNtp(spec)) return;
+            String home = resolveHomeUrl(param.thisObject.getClass().getClassLoader());
+            if (home == null || home.isEmpty() || isNtp(home)) return;
+            XposedHelpers.setObjectField(params, "a", home);
+            XposedBridge.log(HookEntry.TAG + ": createNewTab NTP -> home " + home);
+        } catch (Throwable t) {
+            XposedBridge.log(HookEntry.TAG + ": newtab replacement error -> " + t);
         }
     }
 
@@ -324,8 +358,13 @@ public final class HomeCleaner {
     /** 找 TabModelSelector(根包 tuo): 精确 Class.forName + activity 字段扫描 */
     private static Object findTabModelSelector(Activity activity) {
         try {
-            Class<?> selectorClass = Class.forName(CLS_SELECTOR, false,
-                    activity.getClass().getClassLoader());
+            ClassLoader cl = activity.getClass().getClassLoader();
+            Class<?> selectorClass;
+            try {
+                selectorClass = Class.forName(CLS_SELECTOR_152, false, cl);
+            } catch (Throwable ignored) {
+                selectorClass = Class.forName(CLS_SELECTOR, false, cl);
+            }
             if (sSelectorField != null) {
                 try {
                     Object cached = sSelectorField.get(activity);
@@ -373,7 +412,12 @@ public final class HomeCleaner {
                 return m;
             }
         } catch (Throwable t) {
-            XposedBridge.log(HookEntry.TAG + ": selector.l(false) failed -> " + t);
+            try {
+                Object m = XposedHelpers.callMethod(selector, "k", Boolean.FALSE);
+                if (m != null) return m;
+            } catch (Throwable ignored) {
+            }
+            XposedBridge.log(HookEntry.TAG + ": selector model lookup failed -> " + t);
         }
         return getRegularModelByMemory();
     }
@@ -390,7 +434,26 @@ public final class HomeCleaner {
 
     /** 主页 URL: home_url 配置 → 根包 jza(主页管理器).d().b(false) → NTP */
     private static String resolveHomeUrl(ClassLoader cl) {
-        // v1.9.5: 自定义主页已删除, 直接跟随 Chrome 设置主页 / 默认新标签页
+        // Chrome 152: w5c.b(boolean, boolean) is the current HomepageManager API.
+        try {
+            Class<?> homeMgr = Class.forName(CLS_HOME_MGR_152, false, cl);
+            Object singleton = XposedHelpers.callStaticMethod(homeMgr, "d");
+            if (singleton != null) {
+                Object gurl = XposedHelpers.callMethod(singleton, "b", Boolean.FALSE,
+                        Boolean.FALSE);
+                if (gurl != null) {
+                    Object urlText = XposedHelpers.getObjectField(gurl, "a");
+                    if (urlText instanceof String && !((String) urlText).isEmpty()) {
+                        return (String) urlText;
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            if (HookEntry.DEBUG) {
+                XposedBridge.log(HookEntry.TAG + ": resolveHomeUrl(w5c) failed -> " + t);
+            }
+        }
+        // Chrome 145 fallback: jza.d().b(boolean).
         try {
             Class<?> jzaClass = Class.forName(CLS_HOME_MGR, false, cl);
             Object singleton = XposedHelpers.callStaticMethod(jzaClass, "d");
@@ -404,7 +467,9 @@ public final class HomeCleaner {
                 }
             }
         } catch (Throwable t) {
-            XposedBridge.log(HookEntry.TAG + ": resolveHomeUrl(jza) failed -> " + t);
+            if (HookEntry.DEBUG) {
+                XposedBridge.log(HookEntry.TAG + ": resolveHomeUrl(jza) failed -> " + t);
+            }
         }
         return DEFAULT_NTP;
     }
@@ -458,13 +523,35 @@ public final class HomeCleaner {
                 return;
             }
             Class<?> nClass = Class.forName(HookEntry.CLS_J_N, false, cl);
-            Method m = nClass.getMethod("VIOOOOOOO", int.class, int.class, Object.class,
-                    Object.class, Object.class, Object.class, Object.class, Object.class,
-                    Object.class);
-            m.invoke(null, Integer.valueOf(METHOD_ID_REMOVE_BROWSING_DATA),
-                    Integer.valueOf(period), profile, null,
-                    new int[]{BROWSING_DATA_TYPE_TABS},
-                    new String[0], new int[0], new String[0], new int[0]);
+            try {
+                // Chrome 152: ClearBrowsingDataFragment calls
+                // N.VIOOOOO(period, BrowsingDataBridge.a(profile), listener,
+                //                  dataTypes, allowlistedDomains, excludedDomains).
+                Class<?> bridgeClass = Class.forName(
+                        "org.chromium.chrome.browser.browsing_data.BrowsingDataBridge",
+                        false, cl);
+                Object bridge = XposedHelpers.callStaticMethod(bridgeClass, "a", profile);
+                Object nativeBridge = XposedHelpers.getObjectField(bridge, "a");
+                Class<?> listenerClass = Class.forName(
+                        "org.chromium.chrome.browser.browsing_data.BrowsingDataBridge$OnClearBrowsingDataListener",
+                        false, cl);
+                Object listener = java.lang.reflect.Proxy.newProxyInstance(
+                        cl, new Class<?>[]{listenerClass}, (proxy, method, args) -> null);
+                Method current = nClass.getMethod("VIOOOOO", int.class, Object.class,
+                        Object.class, Object.class, Object.class, Object.class);
+                current.invoke(null, Integer.valueOf(period), nativeBridge, listener,
+                        new int[]{BROWSING_DATA_TYPE_TABS}, new String[0], new String[0]);
+            } catch (Throwable currentFailure) {
+                // Chrome 145 fallback: the old generated JNI signature included
+                // an extra method-id/period pair and four array arguments.
+                Method legacy = nClass.getMethod("VIOOOOOOO", int.class, int.class,
+                        Object.class, Object.class, Object.class, Object.class,
+                        Object.class, Object.class, Object.class);
+                legacy.invoke(null, Integer.valueOf(METHOD_ID_REMOVE_BROWSING_DATA),
+                        Integer.valueOf(period), profile, null,
+                        new int[]{BROWSING_DATA_TYPE_TABS},
+                        new String[0], new int[0], new String[0], new int[0]);
+            }
             XposedBridge.log(HookEntry.TAG + ": native clear closed tabs OK "
                     + "(type=" + BROWSING_DATA_TYPE_TABS + ", period=" + period + ")");
         } catch (Throwable t) {
@@ -572,11 +659,28 @@ public final class HomeCleaner {
             }
             Class<?> gurlClass = Class.forName(CLS_GURL, false, cl);
             Object gurl = gurlClass.getConstructor(String.class).newInstance(url);
-            Method m = findBySignature(model, Object.class, Object.class, int.class);
+            Method m = null;
+            try {
+                m = model.getClass().getSuperclass().getMethod(
+                        "openTabProgrammatically", gurlClass, int.class, boolean.class);
+            } catch (Throwable ignored) {
+                try {
+                    Class<?> bridgeType = Class.forName(CLS_TAB_MODEL_JNI_BRIDGE, false, cl);
+                    m = bridgeType.getDeclaredMethod(
+                            "openTabProgrammatically", gurlClass, int.class, boolean.class);
+                } catch (Throwable ignoredAgain) {
+                    m = findBySignature(model, Object.class, Object.class, int.class);
+                }
+            }
             if (m == null) {
                 return null;
             }
-            Object tab = m.invoke(model, gurl, Integer.valueOf(2));
+            Object tab;
+            if (m.getParameterTypes().length == 3) {
+                tab = m.invoke(model, gurl, Integer.valueOf(2), Boolean.FALSE);
+            } else {
+                tab = m.invoke(model, gurl, Integer.valueOf(2));
+            }
             XposedBridge.log(HookEntry.TAG + ": opened home tab -> "
                     + (tab == null ? "null" : tab.getClass().getName()));
             return tab;
