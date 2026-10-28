@@ -32,7 +32,7 @@ jobs:
           sdkmanager_bin="$(find "$sdk_root" -type f -path '*/cmdline-tools/*/bin/sdkmanager' -print -quit)"
           test -x "$sdkmanager_bin"
           yes | "$sdkmanager_bin" --licenses > /dev/null
-          "$sdkmanager_bin" --install "platforms;android-37" "build-tools;37.0.0"
+          "$sdkmanager_bin" --install "platforms;android-37.0" "build-tools;37.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
