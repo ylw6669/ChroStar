@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- v2.5.4: Android 11+ 包可见性。不声明时 getPackageInfo("com.android.chrome") 抛
+         NameNotFoundException, 设置页会误报"未检测到 Chrome"并导致按版本建档永不触发。
+         hook 侧运行在 Chrome 进程内不受影响, 因此该缺陷只在设置页暴露。 -->
+    <queries>
+        <package android:name="com.android.chrome" />
+        <package android:name="com.chrome.beta" />
+        <package android:name="com.chrome.dev" />
+        <package android:name="com.chrome.canary" />
+    </queries>
+
     <application
         android:label="ChroStar"
         android:icon="@mipmap/ic_launcher"
@@ -17,6 +27,14 @@
         <meta-data
             android:name="xposedminversion"
             android:value="82" />
+        <!-- v2.3.19: 启用 LSPosed New XSharedPreferences, 作为配置主通道。
+             依据 LSPosed 源码(LoadedApkCreateCLHooker.hookNewXSP): 当 xposedminversion > 92
+             或存在本 meta-data 时, 框架会 hook ContextImpl.getPreferencesDir() 与 checkMode(),
+             把模块 prefs 落到 safe-zone 并允许 MODE_WORLD_READABLE。
+             这里保持 xposedminversion=82(不改基版本), 仅以本标志触发 New XSP。 -->
+        <meta-data
+            android:name="xposedsharedprefs"
+            android:value="true" />
         <!-- 作用域：com.android.chrome -->
         <meta-data
             android:name="xposedscope"
@@ -37,6 +55,12 @@
         <!-- v1.11.2: 关于二级页(全屏) -->
         <activity android:name=".AboutActivity"
             android:exported="false"
+            android:theme="@style/Theme.HomeLauncher" />
+
+        <!-- v2.5.4: 调试与日志二级页(重扫符号/重置档案/抓取 hook 日志) -->
+        <activity android:name=".DebugActivity"
+            android:exported="false"
+            android:label="调试与日志"
             android:theme="@style/Theme.HomeLauncher" />
 
         <!-- v1.10.4: 配置跨进程读取通道(XSharedPreferences 无法跨进程读取) -->

@@ -5,8 +5,12 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,9 +29,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,9 +45,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.ylw6669.chrostar.effect.BgEffectBackground
+import androidx.navigationevent.compose.LocalNavigationEventDispatcherOwner
+import androidx.navigationevent.compose.rememberNavigationEventDispatcherOwner
+import top.yukonga.miuix.kmp.basic.Button
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
+import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -55,10 +66,14 @@ class AboutActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
+            val navOwner = rememberNavigationEventDispatcherOwner(enabled = true, parent = null)
             val controller = remember { ThemeController(ColorSchemeMode.System) }
-            MiuixTheme(controller = controller) {
-                AboutScreen { finish() }
+            CompositionLocalProvider(LocalNavigationEventDispatcherOwner provides navOwner) {
+                MiuixTheme(controller = controller) {
+                    AboutScreen { finish() }
+                }
             }
         }
     }
@@ -66,8 +81,10 @@ class AboutActivity : ComponentActivity() {
 
 @Composable
 private fun AboutScreen(onBack: () -> Unit) {
+    val context = LocalContext.current
     val lazyListState = rememberLazyListState()
     var logoHeightPx by remember { mutableIntStateOf(0) }
+    var showSupportedVersions by remember { mutableStateOf(false) }
 
     // 滚动进度 0..1 (滚过 Logo 区域为 1), 驱动背景淡出
     val scrollProgress by remember {
@@ -83,21 +100,58 @@ private fun AboutScreen(onBack: () -> Unit) {
     }
 
     val backdrop = rememberLayerBackdrop()
-    Box(modifier = Modifier.fillMaxSize()) {
-        BgEffectBackground(
-            dynamicBackground = true,
-            modifier = Modifier.fillMaxSize(),
-            bgModifier = Modifier.layerBackdrop(backdrop),
-            isFullSize = true,
-            effectBackground = true,
-            alpha = { 1f - scrollProgress },
+    Scaffold(modifier = Modifier.fillMaxSize()) { _ ->
+        Box(modifier = Modifier.fillMaxSize()) {
+            BgEffectBackground(
+                dynamicBackground = true,
+                modifier = Modifier.fillMaxSize(),
+                bgModifier = Modifier.layerBackdrop(backdrop),
+                isFullSize = true,
+                effectBackground = true,
+                alpha = { 1f - 0.25f * scrollProgress },
+            ) {
+                AboutContent(
+                    backdrop = backdrop,
+                    onBack = onBack,
+                    lazyListState = lazyListState,
+                    onLogoHeightChanged = { logoHeightPx = it },
+                    onShowSupportedVersions = { showSupportedVersions = true },
+                )
+            }
+        }
+
+        OverlayDialog(
+            show = showSupportedVersions,
+            title = "适配 Chrome 版本",
+            summary = "当前安装与已验证版本",
+            onDismissRequest = { showSupportedVersions = false }
         ) {
-            AboutContent(
-                backdrop = backdrop,
-                onBack = onBack,
-                lazyListState = lazyListState,
-                onLogoHeightChanged = { logoHeightPx = it },
+            val current = CapsCache.installedVersionName(context, "com.android.chrome")
+            Text(
+                text = buildString {
+                    if (!current.isNullOrBlank()) {
+                        append("当前安装：Chrome ").append(current).append("\n\n")
+                    }
+                    append("已验证版本\n")
+                    append("145.0.7632.218\n")
+                    append("152.0.7977.82\n")
+                    append("153.0.8010.47\n")
+                    append("154.0.8037.49 / 154.0.8037.126\n")
+                    append("155.0.8059.84")
+                },
+                fontSize = 13.sp,
+                lineHeight = 20.sp,
             )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Button(onClick = { showSupportedVersions = false }) {
+                    Text(text = "知道了")
+                }
+            }
         }
     }
 }
@@ -108,6 +162,7 @@ private fun AboutContent(
     onBack: () -> Unit,
     lazyListState: LazyListState,
     onLogoHeightChanged: (Int) -> Unit,
+    onShowSupportedVersions: () -> Unit,
 ) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
@@ -130,49 +185,42 @@ private fun AboutContent(
         }
     }
 
-    // Logo 区(背景层, 不随列表滚动): 仅标题(图标已按需求移除)
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 196.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .then(
-                    if (effectBackground) {
-                        Modifier.textureBlur(
-                            backdrop = backdrop,
-                            shape = RoundedCornerShape(0.dp),
-                            blurRadius = 150f,
-                            colors = BlurColors(blendColors = logoBlend),
-                            contentBlendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
-                            enabled = true,
-                        )
-                    } else Modifier
-                ),
-            text = "ChroStar",
-            color = if (isDark) Color(0xFFF2F2F7) else Color(0xFF1E110D),
-            fontWeight = FontWeight.Bold,
-            fontSize = 35.sp,
-        )
-    }
-
-    // 可滚动内容: 顶部透明占位(露出 Logo, 高度决定卡片靠下程度) + 半透明链接卡片
+    // 标题与卡片共用同一个 LazyColumn：上滑时标题自然移出屏幕，下滑时重新出现。
     LazyColumn(
         state = lazyListState,
         modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 24.dp),
     ) {
-        item(key = "logoSpacer") {
-            Box(
-                Modifier
+        item(key = "logo") {
+            Column(
+                modifier = Modifier
                     .fillMaxWidth()
                     .height(350.dp)
                     .onSizeChanged { size -> onLogoHeightChanged(size.height) },
-                contentAlignment = Alignment.TopCenter,
-                content = { },
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Spacer(Modifier.height(196.dp))
+                Text(
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .then(
+                            if (effectBackground) {
+                                Modifier.textureBlur(
+                                    backdrop = backdrop,
+                                    shape = RoundedCornerShape(0.dp),
+                                    blurRadius = 150f,
+                                    colors = BlurColors(blendColors = logoBlend),
+                                    contentBlendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                                    enabled = true,
+                                )
+                            } else Modifier
+                        ),
+                    text = "ChroStar",
+                    color = if (isDark) Color(0xFFF2F2F7) else Color(0xFF1E110D),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 35.sp,
+                )
+            }
         }
         item(key = "about") {
             Card(
@@ -190,8 +238,8 @@ private fun AboutContent(
                 )
                 ArrowPreference(
                     title = "适配 Chrome 版本",
-                    summary = "145.0.7632.218(763221864)",
-                    onClick = { },
+                    summary = "点击查看完整适配列表",
+                    onClick = onShowSupportedVersions,
                 )
                 ArrowPreference(
                     title = "作者 星辰",

@@ -15,5 +15,5 @@ dependencyResolutionManagement {
         maven { url 'https://api.xposed.info/' }
     }
 }
-rootProject.name = "ChromeHomeLauncher"
+rootProject.name = "ChroStar"
 include ':app'

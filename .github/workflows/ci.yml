@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Android build and static repository check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: module
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Install Android SDK 37 and build tools
+        run: |
+          sdk_root="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          sdkmanager_bin="$(find "$sdk_root" -type f -path '*/cmdline-tools/*/bin/sdkmanager' -print -quit)"
+          test -x "$sdkmanager_bin"
+          yes | "$sdkmanager_bin" --licenses > /dev/null
+          "$sdkmanager_bin" --install "platforms;android-37.0" "build-tools;37.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a # v4
+
+      - name: Repository integrity check
+        run: python3 ../verification/check_repository.py
+
+      - name: Assemble release
+        run: ./gradlew :app:assembleRelease --no-daemon
+
+      - name: Lint release
+        run: ./gradlew :app:lintRelease --no-daemon
