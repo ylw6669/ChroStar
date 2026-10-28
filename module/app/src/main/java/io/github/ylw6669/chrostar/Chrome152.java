@@ -11,17 +11,22 @@ public final class Chrome152 {
     public static final String TAB_SELECTOR = "k3r";       // Tab 选择器 k(boolean)->TabModel
     public static final String DOWNLOAD_MESSAGE = "ia8";   // 145: je7 (d(OfflineItem,boolean,boolean,boolean) 同签名)
     public static final String MESSAGE_DISPATCHER = "gig"; // 145: nze (b(PM,WC,int,boolean)+c(PM,boolean) 同签名)
-    public static final String CLOSE_ALL_DIALOG = "q35";   // 关全部标签对话框处理器(替代 145 id4.run 菜单路径)
+    public static final String CLOSE_ALL_DIALOG = "q35";   // 实为 MobileCloseAllTabsDialog handler(非 Runnable; 命名误导已澄清); 152 关全部走 HomeCleaner 语义通道不经此
     public static final String DOWNLOAD_SERVICE = "ud4";   // 下载消息服务宿主(ia8 的宿主)
 
-    // OfflineItem 字段 145 -> 152
-    public static final String OI_STATE = "q0";            // 145: m0 (完成=2)
+    // OfflineItem 字段 145 -> 152 (反编译实证 Chrome.aab-stable-797708204 · DownloadInfo.a(OfflineItem))
+    public static final String OI_STATE = "q0";            // 145: m0 (int, 完成=2)
+    public static final String OI_PATH  = "T";             // 145: P  (String 完整路径; g88.e=offlineItem.T)
+    public static final String OI_NAME  = "i0";            // 145: e0 (String 文件名;   g88.g=offlineItem.i0)
+    public static final String OI_MIME  = "j0";            // 145: f0 (String MIME;     g88.c=offlineItem.j0)
     public static final String OI_CONTENT_ID = "S";
 
-    // DownloadInfo 字段(公开类公开字段, Java 直读)
+    // DownloadInfo 字段(公开类公开字段, Java 直读; 145/152 同形: c=mime, e=filePath, g=fileName)
+    // 反编译实证: createDownloadInfo 里 c=remapGenericMimeType(mime), e=str2(filePath), g=str3(fileName)。
+    // 修正: 旧值 DI_NAME="e"/DI_PATH="g" 把名/径写反(e 是路径, g 是文件名)。
     public static final String DI_MIME = "c";
-    public static final String DI_NAME = "e";
-    public static final String DI_PATH = "g";
+    public static final String DI_NAME = "g";              // fileName
+    public static final String DI_PATH = "e";              // filePath
 
     // J.N 通用通道 selector: 145 VIOOOOOOO 在 152 无同形态命中 —
     // 历史清理在 152 走语义降级(见 HomeCleaner), 不硬编码不可验证的 selector。

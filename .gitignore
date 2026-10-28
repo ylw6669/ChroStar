@@ -1,17 +1,34 @@
-# 构建产物
-build/
-module/build/
-build-proj/build/
-app/build/
-
-# 密钥与本地配置
-*.keystore
-*.jks
+# 本地构建环境(勿提交)
 local.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
 
-# 日志与临时文件
-*.log
-.openclaw-tmp/
+# 构建产物与发布包不入库
+*.apk
+*.aab
+*.idsig
+*.zip
+*.7z
+
+# Gradle
 .gradle/
+build/
+*/build/
+
+# IDE
 .idea/
 *.iml
+.vscode/
+
+# 临时与日志
+*.log
+*.tmp
+*.bak
+.DS_Store
+.tmp_v200/
+_tmp_*.java
+module/.gradle-user/
+_交付物/
+.ai/

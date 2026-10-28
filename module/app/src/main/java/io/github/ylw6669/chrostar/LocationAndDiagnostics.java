@@ -10,6 +10,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -58,8 +59,7 @@ public final class LocationAndDiagnostics {
                     }
                 }
             };
-            XposedBridge.hookAllMethods(prefService, "b", booleanHook);
-            XposedBridge.hookAllMethods(prefService, "c", new XC_MethodHook() {
+            XC_MethodHook intHook = new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) {
                     try {
@@ -72,8 +72,23 @@ public final class LocationAndDiagnostics {
                     } catch (Throwable ignored) {
                     }
                 }
-            });
-            XposedBridge.log(HookEntry.TAG + ": location prompt source bound (PrefService.getBoolean)");
+            };
+            int boolCount = 0;
+            int intCount = 0;
+            for (Method method : prefService.getDeclaredMethods()) {
+                Class<?>[] params = method.getParameterTypes();
+                if (params.length != 1 || params[0] != String.class) continue;
+                Class<?> result = method.getReturnType();
+                if (result == boolean.class || result == Boolean.class) {
+                    XposedBridge.hookMethod(method, booleanHook);
+                    boolCount++;
+                } else if (result == int.class || result == Integer.class) {
+                    XposedBridge.hookMethod(method, intHook);
+                    intCount++;
+                }
+            }
+            XposedBridge.log(HookEntry.TAG + ": location prompt source bound structurally"
+                    + " (boolean=" + boolCount + ", int=" + intCount + ")");
         } catch (Throwable t) {
             XposedBridge.log(HookEntry.TAG + ": location pref hook failed -> " + t);
         }
@@ -87,8 +102,10 @@ public final class LocationAndDiagnostics {
         StringBuilder sb = new StringBuilder();
         sb.append("{\n");
         sb.append("  \"module\": \"ChroStar\",\n");
-        sb.append("  \"moduleVersion\": \"").append("2.2.0").append("\",\n");
+        sb.append("  \"moduleVersion\": \"").append(BuildConfig.VERSION_NAME).append("\",\n");
         sb.append("  \"engineVersion\": \"").append(HookEntry.engineVersion).append("\",\n");
+        sb.append(CompatibilityResolver.diagnosticsJson(HookEntry.engineVersion)
+                .replace("\n", "\n  ")).append(",\n");
         sb.append("  \"targetPackage\": \"").append(ctx.getPackageName()).append("\",\n");
         sb.append("  \"timestamp\": \"").append(
                 new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(new Date())).append("\",\n");
